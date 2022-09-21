@@ -15,31 +15,50 @@ namespace API.Controllers
     public class ListingsController : ControllerBase
     {
         private readonly ILogger<ListingsController> _logger;
-        private readonly IConfiguration _configuration;
-        private IListManager _listManager;
+        // Below object probably not needed
+        //private readonly IConfiguration _configuration;
+        private readonly IListManager _listManager;
 
-        public ListingsController(ILogger<ListingsController> logger, IConfiguration config)
+        public ListingsController(ILogger<ListingsController> logger, IListManager listManager)
         {
             _logger = logger;
-            _configuration = config;
+            // Below object probably not needed, removed from parameters
+            //_configuration = config;
+
+            // Inject IListManager in constructor
+            _listManager = listManager;
         }
 
-        [HttpGet("")]
-        [Route("")]
-        public IActionResult GetListings(string suburb, CategoryType categoryType = CategoryType.None, StatusType statusType = StatusType.None, int skip = 0, int take = 10)
+        // Suburb in route
+        [HttpGet("{suburb}")]
+        public IActionResult GetListings([FromRoute] string suburb, [FromQuery] CategoryType categoryType = CategoryType.None,
+            [FromQuery] StatusType statusType = StatusType.None, [FromQuery] int skip = 0, [FromQuery] int take = 10)
         {
             if (string.IsNullOrEmpty(suburb))
-                return BadRequest("No Suburb provided");
+            {
+                // May need to log error
+                _logger.LogError($"No Suburb provided.");
+                // Additional information in error message
+                return BadRequest("No Suburb provided in route api/listings/{suburb}");
+            }
 
-            _listManager = new ListManager(_configuration);
+            // Comment out following as already initialised in constructor
+            //_listManager = new ListManager(_configuration);
 
             PagedResult<Listing> listings = _listManager.GetListings(suburb, categoryType, statusType, skip, take);
 
+            string errMsg = $"No listings found for suburb {suburb}";
             if (listings != null && listings.Results != null)
             {
-                if (!listings.Results.Any())
+                if (listings.Results.Any() == false)
                 {
-                    throw new Exception("No results");
+                    
+                    // May need to log
+                    _logger.LogWarning(errMsg);
+                    
+                    // Instead of throwing exception return NotFound result
+                    //throw new Exception("No results");
+                    return NotFound(errMsg);
                 }
                 else
                 {
@@ -47,7 +66,9 @@ namespace API.Controllers
                 }
             }
 
-            return NotFound();
+            // May need to log
+            _logger.LogWarning(errMsg);
+            return NotFound(errMsg);
         }
     }
 }
