@@ -42,6 +42,9 @@ namespace API
                 endpoints.MapControllers();
             });
 
+            app.UseStatusCodePagesWithReExecute("/error/{0}"); 
+            app.UseExceptionHandler("/error/500");
+
             // initialise Dapper Fluent mappings
             Core.Startup.Register();
         }

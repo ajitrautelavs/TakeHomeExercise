@@ -1,7 +1,7 @@
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 
-namespace API.Core.Models
+namespace API.Core.Classes
 {
     public class Enums
     {

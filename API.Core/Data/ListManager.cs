@@ -2,11 +2,12 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using API.Core.Custom;
+using API.Core.Classes;
+using API.Core.Data;
 using API.Core.Models;
 using Dapper;
 using Microsoft.Extensions.Configuration;
-using static API.Core.Models.Enums;
+using static API.Core.Classes.Enums;
 
 namespace API.Core
 {
@@ -18,13 +19,16 @@ namespace API.Core
         { 
             _configuration = config;
         }
-        public PagedResult<Listing> GetListings(string suburb, CategoryType categoryType, StatusType statusType, int skip, int take)
+
+        // Make below function async
+        public async Task<PagedResult<Listing>> GetListings(string suburb, CategoryType categoryType, StatusType statusType, int skip, int take)
         {            
             var listings = new List<Listing>();
             var total = 0;
 
             var filter = categoryType != CategoryType.None ? $" AND CategoryType = {(int)categoryType } " : string.Empty;
-            filter = statusType != StatusType.None ? filter + $" AND StatusType = {(int)statusType } " : string.Empty;
+            // Bugfix to retain previous filter value
+            filter += statusType != StatusType.None ? $" AND StatusType = {(int)statusType } " : string.Empty;
 
             var sql = $@" SELECT count(ListingId) FROM [Backend-TakeHomeExercise].dbo.Listings WITH(NOLOCK)
                                 WHERE Suburb = @suburb { filter} ;
@@ -44,7 +48,8 @@ namespace API.Core
                 var multi = db.QueryMultiple(cmd);
 
                 total = multi.Read<int>().FirstOrDefault();
-                listings = multi.Read<Listing>().ToList();
+                //Use ReadAsync
+                listings = (List<Listing>)await multi.ReadAsync<Listing>();
             }
 
             if (total == 0)

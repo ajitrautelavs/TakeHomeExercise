@@ -1,6 +1,6 @@
 using System.Data;
 
-namespace API.Core.Custom
+namespace API.Core.Services
 {
     public interface IDbManager
     {

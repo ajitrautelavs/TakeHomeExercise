@@ -1,4 +1,4 @@
-namespace API.Core.Custom
+namespace API.Core.Classes
 {
     public class ConnectionStrings
     {

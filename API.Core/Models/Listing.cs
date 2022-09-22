@@ -1,8 +1,8 @@
 using System.Linq;
 using System.Text;
-using API.Core.Custom;
+using API.Core.Classes;
 using Newtonsoft.Json;
-using static API.Core.Models.Enums;
+using static API.Core.Classes.Enums;
 
 namespace API.Core.Models
 {

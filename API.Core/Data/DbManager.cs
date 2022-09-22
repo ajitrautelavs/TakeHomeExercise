@@ -1,10 +1,11 @@
 using System.Data;
 using System.Data.SqlClient;
 using System.Text;
+using API.Core.Services;
 using Microsoft.Extensions.Configuration;
-using static API.Core.Models.Enums;
+using static API.Core.Classes.Enums;
 
-namespace API.Core.Custom
+namespace API.Core.Data
 {
     public class DbManager : IDbManager
     {
@@ -17,15 +18,17 @@ namespace API.Core.Custom
             var sb = new StringBuilder();
             sb.Append(Name.ToString());
 
-            if (AccessLevel == DbAccessLevel.WRITE)
-            {
-                sb.Append("Write");
-            }
-            else
-            {
-                sb.Append("Read");
-            }
-            _connectionString = ConfigurationExtensions.GetConnectionString(config, sb.ToString()).ToString();
+            sb.Append(AccessLevel.ToString());
+            // Instead of below If statment use above ToString()
+            //if (AccessLevel == DbAccessLevel.WRITE)
+            //{
+            //    sb.Append("Write");
+            //}
+            //else
+            //{
+            //    sb.Append("Read");
+            //}
+            _connectionString = _configuration.GetConnectionString(sb.ToString()).ToString();
         }
 
         public IDbConnection GetConnection()
